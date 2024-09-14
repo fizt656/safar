@@ -9,7 +9,7 @@ from utils import print_slow, print_slow_multiline, print_progress_bar, print_wa
 from audio import play_startup_sound, play_shutdown_sound, play_random_sound_effect, play_visualize_sound_effect
 from config import (
     IMAGE_DIRECTORY, TerminalColors, BANNER, GOODBYE_BANNER, VISUALIZE_SOUND_EFFECT,
-    check_and_update_api_key, check_and_update_replicate_token, set_image_gen_method
+    OPENROUTER_KEY, REPLICATE_API_TOKEN, set_image_gen_method
 )
 
 def open_file(file_path):
@@ -35,10 +35,14 @@ async def main():
     method = choose_image_generation_method()
     set_image_gen_method(method)
 
-    # Check and update the API keys if necessary
-    api_key = check_and_update_api_key()
-    if method == 'replicate':
-        replicate_token = check_and_update_replicate_token()
+    # Check if API keys are set
+    if not OPENROUTER_KEY:
+        print("Error: OPENROUTER_KEY is not set. Please set it in the config file or as an environment variable.")
+        return
+    
+    if method == 'replicate' and not REPLICATE_API_TOKEN:
+        print("Error: REPLICATE_API_TOKEN is not set. Please set it in the config file or as an environment variable.")
+        return
 
     play_startup_sound()
     await print_slow_multiline(f"""Initializing Safar...{TerminalColors.OKGREEN}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
@@ -126,7 +130,7 @@ Verifying System Integrity...{TerminalColors.OKGREEN}█▓░█▓░█▓░
             conversation_history.append(("user", user_input))
             await print_slow_multiline(f"{TerminalColors.HEADER}Processing your request...{TerminalColors.ENDC}")
             await play_random_sound_effect()  # Play a random sound effect for general input
-            response = await generate_response(conversation_history, 'openrouter', api_key)  # Use the updated api_key
+            response = await generate_response(conversation_history, 'openrouter', OPENROUTER_KEY)
             conversation_history.append(("assistant", response))
             print()
 

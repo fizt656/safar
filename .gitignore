@@ -8,6 +8,7 @@ venv/
 env/
 *.env
 safar_venv/
+safar_env/
 
 # IDE files
 .vscode/
