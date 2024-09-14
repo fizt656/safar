@@ -1,5 +1,5 @@
 ![Safar Banner](safar.png)
-# **سفر**  Safar**
+# ** سفر  Safar**
 
 Remember those text adventure games from the 80s? The ones where you'd type "go north" and hope you didn't get eaten by a grue? Well, strap in, because Safar (سفر) is what happens when those games drink a gallon of cosmic coffee and gain sentience!
 
