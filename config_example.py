@@ -3,7 +3,7 @@
 import os
 
 # Authentication
-OPENROUTER_KEY = 'your_openrouter_api_key_here'
+OPENROUTER_KEY = os.environ.get('OPENROUTER_KEY', '')
 REPLICATE_API_TOKEN = os.environ.get('REPLICATE_API_TOKEN', '')
 
 # Image generation method

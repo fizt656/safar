@@ -83,20 +83,34 @@ async def generate_response(conversation_history, api_name, api_key):
                 return response_text.strip()
 
 async def generate_image_prompt(last_message):
+    if not OPENROUTER_KEY or OPENROUTER_KEY == 'your_openrouter_api_key_here':
+        print("Error: OPENROUTER_KEY is not set or is set to the default value.")
+        return None
+
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT_IMG},
         {"role": "user", "content": last_message}
     ]
 
     async with aiohttp.ClientSession() as session:
-        async with session.post('https://openrouter.ai/api/v1/chat/completions', json={"model": IMG_PROMPT_MODEL, "temperature": .5, "max_tokens": 128, "messages": messages}, headers={'Authorization': f'Bearer {OPENROUTER_KEY}', 'Content-Type': 'application/json'}) as response:
-            response_json = await response.json()
+        async with session.post('https://openrouter.ai/api/v1/chat/completions', 
+                                json={"model": IMG_PROMPT_MODEL, "temperature": .5, "max_tokens": 128, "messages": messages}, 
+                                headers={'Authorization': f'Bearer {OPENROUTER_KEY}', 'Content-Type': 'application/json'}) as response:
+            response_text = await response.text()
+
+            try:
+                response_json = json.loads(response_text)
+            except json.JSONDecodeError:
+                print("Failed to parse API response as JSON")
+                return None
 
             if 'choices' in response_json and len(response_json['choices']) > 0:
                 generated_prompt = response_json['choices'][0]['message']['content']
                 return generated_prompt
             else:
-                print("No 'choices' found in the OpenRouter API response.")
+                print("Failed to generate image prompt.")
+                if 'error' in response_json:
+                    print(f"API Error: {response_json['error']}")
                 return None
 
 async def generate_image_replicate(image_prompt):
@@ -216,10 +230,8 @@ async def generate_image_local_sd(image_prompt):
     except Exception as e:
         print(f"An error occurred in generate_image_local_sd: {str(e)}")
         return None
-
 async def generate_image(image_prompt):
     image_gen_method = get_image_gen_method()
-    print(f"Current IMAGE_GEN_METHOD: {image_gen_method}")  # Debug print
     if image_gen_method == 'replicate':
         return await generate_image_replicate(image_prompt)
     elif image_gen_method == 'local_sd':
