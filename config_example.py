@@ -18,9 +18,9 @@ def set_image_gen_method(method):
 def get_image_gen_method():
     return IMAGE_GEN_METHOD
 
-# LLM MODELS
-SYSTEM_PROMPT_MODEL = 'cohere/command-r-plus'
-IMG_PROMPT_MODEL = 'microsoft/wizardlm-2-7b'
+# LLM MODELS (see  for more)
+SYSTEM_PROMPT_MODEL = 'cohere/command-r-plus-04-2024'
+IMG_PROMPT_MODEL = 'cohere/command-r-plus-04-2024'
 
 # Replicate model for image generation
 REPLICATE_MODEL = "black-forest-labs/flux-dev"
