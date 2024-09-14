@@ -18,7 +18,7 @@ def set_image_gen_method(method):
 def get_image_gen_method():
     return IMAGE_GEN_METHOD
 
-# LLM MODELS (see  for more)
+# LLM MODELS (you can find more models to choose from and swap their ID here: https://openrouter.ai/models)
 SYSTEM_PROMPT_MODEL = 'cohere/command-r-plus-04-2024'
 IMG_PROMPT_MODEL = 'cohere/command-r-plus-04-2024'
 
