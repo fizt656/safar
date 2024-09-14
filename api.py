@@ -152,7 +152,6 @@ async def generate_image_replicate(image_prompt):
                         with open(image_path, 'wb') as f:
                             f.write(image_data)
                         
-                        print(f"Image saved successfully: {image_path}")
                         return image_path
                     else:
                         print(f"Failed to download image. Status code: {response.status}")
@@ -195,11 +194,9 @@ async def generate_image_local_sd(image_prompt):
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                         image_filename = f'generated_image_{timestamp}.png'
                         image_path = os.path.join(IMAGE_DIRECTORY, image_filename)
-                        print("Image path:", image_path)
 
                         with open(image_path, 'wb') as f:
                             f.write(response_content)
-                        print("Image saved successfully.")
                         return image_path
                     else:
                         # Try to parse the response as JSON
@@ -215,11 +212,9 @@ async def generate_image_local_sd(image_prompt):
                                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                                 image_filename = f'generated_image_{timestamp}.png'
                                 image_path = os.path.join(IMAGE_DIRECTORY, image_filename)
-                                print("Image path:", image_path)
 
                                 with open(image_path, 'wb') as f:
                                     f.write(image_data)
-                                print("Image saved successfully.")
                                 return image_path
                         except json.JSONDecodeError:
                             print("Error parsing JSON response.")
@@ -230,6 +225,7 @@ async def generate_image_local_sd(image_prompt):
     except Exception as e:
         print(f"An error occurred in generate_image_local_sd: {str(e)}")
         return None
+
 async def generate_image(image_prompt):
     image_gen_method = get_image_gen_method()
     if image_gen_method == 'replicate':
