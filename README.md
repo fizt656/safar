@@ -59,9 +59,9 @@ With Safar, you can:
 
 Got ideas? Bugs? A theory about the meaning of life? We want it all! Contribute and become part of the Safar legend.
 
-## 📜 Legal Mumbo Jumbo
+## 📜 Legal Stuff
 
-This project is under the MIT License. See [LICENSE](LICENSE) for details. (It's way more fun than the legal text in your old game manuals.)
+This project is under a dual license. See [LICENSE](LICENSE) for details. (It's way more fun than the legal text in your old game manuals.)
 
 ## 🙏 Tip of the Space Helmet
 
