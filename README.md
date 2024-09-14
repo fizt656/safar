@@ -55,13 +55,14 @@ With Safar, you can:
    ```
 
 5. Set up your cosmic keys:
-   - Rename `config_example.py` to `config.py`
-   - Add your OpenRouter API key (it's like the secret code in your decoder ring)
+   - Get your OpenRouter API key (it's like the secret code in your decoder ring)
+   - Don't worry about manually editing any config files. The script will ask for your API key on first run!
 
 6. Launch into the unknown:
    ```
    python safar.py
    ```
+   - On first run, you'll be prompted to enter your OpenRouter API key. It will be safely stored for future adventures!
 
 7. To return to boring old reality (why would you?), deactivate the virtual environment:
    ```

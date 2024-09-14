@@ -7,10 +7,14 @@ from api import generate_response, generate_image_prompt, generate_image
 from utils import print_slow, print_slow_multiline, print_progress_bar, print_warning_bar
 from audio import play_startup_sound, play_shutdown_sound, play_random_sound_effect, play_visualize_sound_effect
 from config import (
-    IMAGE_DIRECTORY, TerminalColors, BANNER, GOODBYE_BANNER, OPENROUTER_KEY, VISUALIZE_SOUND_EFFECT
+    IMAGE_DIRECTORY, TerminalColors, BANNER, GOODBYE_BANNER, VISUALIZE_SOUND_EFFECT,
+    check_and_update_api_key  # Import the new function
 )
 
 async def main():
+    # Check and update the API key if necessary
+    api_key = check_and_update_api_key()
+
     play_startup_sound()
     await print_slow_multiline(f"""Initializing Safar...{TerminalColors.OKGREEN}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
 Loading Core Modules... {TerminalColors.OKGREEN}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
@@ -96,7 +100,7 @@ Verifying System Integrity...{TerminalColors.OKGREEN}█▓░█▓░█▓░
             conversation_history.append(("user", user_input))
             await print_slow_multiline(f"{TerminalColors.HEADER}Processing your request...{TerminalColors.ENDC}")
             await play_random_sound_effect()  # Play a random sound effect for general input
-            response = await generate_response(conversation_history, 'openrouter', OPENROUTER_KEY)
+            response = await generate_response(conversation_history, 'openrouter', api_key)  # Use the updated api_key
             conversation_history.append(("assistant", response))
             print()
 
