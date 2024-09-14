@@ -11,20 +11,20 @@ IMG_PROMPT_MODEL = 'microsoft/wizardlm-2-7b'
 STABLE_DIFFUSION_URL = 'http://127.0.0.1:7860/sdapi/v1/txt2img'
 
 # Sound paths
-STARTUP_SOUND_PATH = 'path/to/startup.mp3'
-SHUTDOWN_SOUND_PATH = 'path/to/shutdown.mp3'
+STARTUP_SOUND_PATH = r'sounds\startup.mp3'
+SHUTDOWN_SOUND_PATH = r'sounds\shutdown.mp3'
 
 # Image directory
 IMAGE_DIRECTORY = "saved_images"
 
 # Sound effects list
 SOUND_EFFECTS = [
-    'path/to/input.mp3',
-    'path/to/input2.mp3',
+    r'sounds\input.mp3',
+    r'sounds\input2.mp3',
 ]
 
 # Visualize sound effect    
-VISUALIZE_SOUND_EFFECT = 'path/to/visualize_sound_effect.mp3'
+VISUALIZE_SOUND_EFFECT = r'sounds\visualize_sound_effect.mp3'
 
 # Terminal colors
 class TerminalColors:
