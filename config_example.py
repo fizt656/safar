@@ -1,30 +1,94 @@
 # config_example.py
 
+import os
+
 # Authentication
 OPENROUTER_KEY = 'your_openrouter_api_key_here'
+REPLICATE_API_TOKEN = os.environ.get('REPLICATE_API_TOKEN', '')
+
+# Image generation method
+IMAGE_GEN_METHOD = None  # Will be set to 'replicate' or 'local_sd' based on user choice
+
+# Function to check and update API key
+def check_and_update_api_key():
+    global OPENROUTER_KEY
+    if OPENROUTER_KEY == 'your_openrouter_api_key_here' or not OPENROUTER_KEY:
+        print("OpenRouter API key is not set in the config file.")
+        new_key = input("Please enter your OpenRouter API key: ").strip()
+        if new_key:
+            OPENROUTER_KEY = new_key
+            # Update this file with the new key
+            with open(__file__, 'r') as file:
+                lines = file.readlines()
+            for i, line in enumerate(lines):
+                if line.startswith('OPENROUTER_KEY'):
+                    lines[i] = f"OPENROUTER_KEY = '{new_key}'\n"
+                    break
+            with open(__file__, 'w') as file:
+                file.writelines(lines)
+            print("API key has been updated in the config file.")
+        else:
+            print("No API key provided. Some features may not work.")
+    return OPENROUTER_KEY
+
+# Function to check and update Replicate API token
+def check_and_update_replicate_token():
+    global REPLICATE_API_TOKEN
+    if not REPLICATE_API_TOKEN:
+        print("Replicate API token is not set.")
+        new_token = input("Please enter your Replicate API token: ").strip()
+        if new_token:
+            REPLICATE_API_TOKEN = new_token
+            os.environ['REPLICATE_API_TOKEN'] = new_token
+            # Update this file with the new token
+            with open(__file__, 'r') as file:
+                lines = file.readlines()
+            for i, line in enumerate(lines):
+                if line.startswith('REPLICATE_API_TOKEN'):
+                    lines[i] = f"REPLICATE_API_TOKEN = os.environ.get('REPLICATE_API_TOKEN', '{new_token}')\n"
+                    break
+            with open(__file__, 'w') as file:
+                file.writelines(lines)
+            print("Replicate API token has been updated in the config file.")
+        else:
+            print("No Replicate API token provided. Image generation may not work.")
+    return REPLICATE_API_TOKEN
+
+# Function to set image generation method
+def set_image_gen_method(method):
+    global IMAGE_GEN_METHOD
+    IMAGE_GEN_METHOD = method
+
+# Function to get the current image generation method
+def get_image_gen_method():
+    return IMAGE_GEN_METHOD
 
 # LLM MODELS
 SYSTEM_PROMPT_MODEL = 'cohere/command-r-plus'
 IMG_PROMPT_MODEL = 'microsoft/wizardlm-2-7b'
 
-# Stable Diffusion API Local URL
-STABLE_DIFFUSION_URL = 'http://127.0.0.1:7860/sdapi/v1/txt2img'
+# Replicate model for image generation
+REPLICATE_MODEL = "black-forest-labs/flux-dev"
+REPLICATE_GUIDANCE = 3.5  # Default guidance value
 
-# Sound paths
-STARTUP_SOUND_PATH = r'sounds\startup.mp3'
-SHUTDOWN_SOUND_PATH = r'sounds\shutdown.mp3'
+# Local Stable Diffusion settings
+STABLE_DIFFUSION_URL = 'http://127.0.0.1:7860/sdapi/v1/txt2img'
 
 # Image directory
 IMAGE_DIRECTORY = "saved_images"
 
+# Sound paths
+STARTUP_SOUND_PATH = 'sounds/startup.mp3'
+SHUTDOWN_SOUND_PATH = 'sounds/shutdown.mp3'
+
 # Sound effects list
 SOUND_EFFECTS = [
-    r'sounds\input.mp3',
-    r'sounds\input2.mp3',
+    'sounds/input.mp3',
+    'sounds/input2.mp3',
 ]
 
 # Visualize sound effect    
-VISUALIZE_SOUND_EFFECT = r'sounds\visualize_sound_effect.mp3'
+VISUALIZE_SOUND_EFFECT = 'sounds/visualize_sound_effect.mp3'
 
 # Terminal colors
 class TerminalColors:
@@ -146,7 +210,7 @@ IF THE USER SIMPLY SAYS THE VISUALIZE COMMAND, RESPOND WITH A COMMON LANGUAGE VI
 """
 
 SYSTEM_PROMPT_IMG = """
-You are an AI assistant that generates detailed image prompts for Stable Diffusion based on conversation context, based on conversation context provided.  
+You are an AI assistant that generates detailed image prompts for AI image generation models based on conversation context provided.  
 
 print ONLY the prompt, and keep it succinct, from the POV of the player.
 
