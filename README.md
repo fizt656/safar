@@ -22,7 +22,7 @@ With Safar, you can:
 
 - **Infinite Universe**: More exploration possibilities than you can shake a joystick at
 - **Actual Science**: Because "it's magic" is so 1985
-- **AI-Generated Images**: For when words just aren't enough (eat your heart out, ASCII art!)
+- **AI-Generated Images**: Now with options! Choose your flavor of reality-bending visuals
 - **Immersive Audio**: Better than the *beep boop* of your old computer
 - **Your Choices Matter**: Unlike that "Choose Your Own Adventure" book where all paths led to certain doom
 
@@ -56,13 +56,15 @@ With Safar, you can:
 
 5. Set up your cosmic keys:
    - Get your OpenRouter API key (it's like the secret code in your decoder ring)
-   - Don't worry about manually editing any config files. The script will ask for your API key on first run!
+   - If you're feeling extra spicy, grab a Replicate API token too!
+   - Don't worry about manually editing any config files. The script will ask for your API keys on first run!
 
 6. Launch into the unknown:
    ```
    python safar.py
    ```
-   - On first run, you'll be prompted to enter your OpenRouter API key. It will be safely stored for future adventures!
+   - On first run, you'll be prompted to enter your API keys. They'll be safely stored for future adventures!
+   - Choose your preferred image generation method: Replicate API for cloud-powered cosmic visions, or local Stable Diffusion for when you want to keep the hallucinations close to home.
 
 7. To return to boring old reality (why would you?), deactivate the virtual environment:
    ```
@@ -76,6 +78,11 @@ With Safar, you can:
 - **Visualize**: Type 'visualize' to see what this cosmic madness looks like.
 - **Rage Quit**: Just kidding, type 'quit' to exit (but why would you?).
 
+## 🎨 Choose Your Reality Painter
+
+- **Replicate API**: For when you want your cosmic visions served fresh from the cloud. Perfect for those who like their realities with a side of internet.
+- **Local Stable Diffusion**: Keep your hallucinations close to home. Ideal for the "I don't trust the cloud with my interdimensional travel plans" crowd.
+
 ## 🤝 Join the Cosmic Crew
 
 Got ideas? Bugs? A theory about the meaning of life? We want it all! Contribute and become part of the Safar legend.
@@ -85,9 +92,4 @@ Got ideas? Bugs? A theory about the meaning of life? We want it all! Contribute 
 This project is under a dual license. See [LICENSE](LICENSE) for details. (It's way more fun than the legal text in your old game manuals.)
 
 ## 🙏 Tip of the Space Helmet
-
-- OpenRouter API for the brains
-- Stable Diffusion for the beauty
 - Every sci-fi author, mad scientist, and daydreamer who made us believe in the impossible
-
-Remember, in Safar, "You have died of dysentery" is not a thing, but "You've accidentally created a universe in a petri dish" totally is. Happy exploring, you magnificent space cowboy! 🌠

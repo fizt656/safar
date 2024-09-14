@@ -5,7 +5,13 @@ from datetime import datetime
 import base64
 import json
 import os
-from config import OPENROUTER_KEY, STABLE_DIFFUSION_URL, SYSTEM_PROMPT, SYSTEM_PROMPT_IMG, SYSTEM_PROMPT_MODEL, IMG_PROMPT_MODEL
+import replicate
+from config import (
+    OPENROUTER_KEY, SYSTEM_PROMPT, SYSTEM_PROMPT_IMG, SYSTEM_PROMPT_MODEL,
+    IMG_PROMPT_MODEL, REPLICATE_API_TOKEN, REPLICATE_MODEL, IMAGE_DIRECTORY,
+    REPLICATE_GUIDANCE, STABLE_DIFFUSION_URL, get_image_gen_method,
+    check_and_update_replicate_token
+)
 
 async def generate_response(conversation_history, api_name, api_key):
     # Concatenate the conversation history into a single string
@@ -93,12 +99,62 @@ async def generate_image_prompt(last_message):
                 print("No 'choices' found in the OpenRouter API response.")
                 return None
 
-async def generate_image(image_prompt):
+async def generate_image_replicate(image_prompt):
+    try:
+        # Check and update Replicate API token if necessary
+        replicate_token = check_and_update_replicate_token()
+        
+        # Ensure the directory for saving images exists
+        if not os.path.exists(IMAGE_DIRECTORY):
+            os.makedirs(IMAGE_DIRECTORY)
+
+        # Set up the Replicate client
+        client = replicate.Client(api_token=replicate_token)
+
+        # Run the Replicate model
+        output = client.run(
+            REPLICATE_MODEL,
+            input={
+                "prompt": image_prompt,
+                "guidance": REPLICATE_GUIDANCE
+            }
+        )
+
+        # The output is a list of image URLs
+        if output and len(output) > 0:
+            image_url = output[0]
+
+            # Download the image
+            async with aiohttp.ClientSession() as session:
+                async with session.get(image_url) as response:
+                    if response.status == 200:
+                        image_data = await response.read()
+                        
+                        # Save the image
+                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                        image_filename = f'generated_image_{timestamp}.png'
+                        image_path = os.path.join(IMAGE_DIRECTORY, image_filename)
+                        
+                        with open(image_path, 'wb') as f:
+                            f.write(image_data)
+                        
+                        print(f"Image saved successfully: {image_path}")
+                        return image_path
+                    else:
+                        print(f"Failed to download image. Status code: {response.status}")
+        else:
+            print("No image URL received from Replicate API.")
+
+        return None
+    except Exception as e:
+        print(f"An error occurred in generate_image_replicate: {str(e)}")
+        return None
+
+async def generate_image_local_sd(image_prompt):
     try:
         # Ensure the directory for saving images exists
-        image_directory = "saved_images"
-        if not os.path.exists(image_directory):
-            os.makedirs(image_directory)
+        if not os.path.exists(IMAGE_DIRECTORY):
+            os.makedirs(IMAGE_DIRECTORY)
 
         # Prepare the API payload with specific parameters for the Stable Diffusion model
         payload = {
@@ -124,7 +180,7 @@ async def generate_image(image_prompt):
                         # Save the PNG image data to a file
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                         image_filename = f'generated_image_{timestamp}.png'
-                        image_path = os.path.join(image_directory, image_filename)
+                        image_path = os.path.join(IMAGE_DIRECTORY, image_filename)
                         print("Image path:", image_path)
 
                         with open(image_path, 'wb') as f:
@@ -144,16 +200,13 @@ async def generate_image(image_prompt):
                                 # Save the image data to a file
                                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                                 image_filename = f'generated_image_{timestamp}.png'
-                                image_path = os.path.join(image_directory, image_filename)
+                                image_path = os.path.join(IMAGE_DIRECTORY, image_filename)
                                 print("Image path:", image_path)
 
                                 with open(image_path, 'wb') as f:
                                     f.write(image_data)
                                 print("Image saved successfully.")
                                 return image_path
-                                print(image_prompt)
-                            else:
-                                print("No image data found in the response.")
                         except json.JSONDecodeError:
                             print("Error parsing JSON response.")
                 else:
@@ -161,5 +214,16 @@ async def generate_image(image_prompt):
 
                 return None
     except Exception as e:
-        print(f"An error occurred in generate_image: {str(e)}")
+        print(f"An error occurred in generate_image_local_sd: {str(e)}")
+        return None
+
+async def generate_image(image_prompt):
+    image_gen_method = get_image_gen_method()
+    print(f"Current IMAGE_GEN_METHOD: {image_gen_method}")  # Debug print
+    if image_gen_method == 'replicate':
+        return await generate_image_replicate(image_prompt)
+    elif image_gen_method == 'local_sd':
+        return await generate_image_local_sd(image_prompt)
+    else:
+        print(f"Invalid image generation method specified: {image_gen_method}")
         return None

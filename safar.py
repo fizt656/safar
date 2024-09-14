@@ -2,18 +2,43 @@
 
 import asyncio
 import os
-import base64
+import subprocess
+import sys
 from api import generate_response, generate_image_prompt, generate_image
 from utils import print_slow, print_slow_multiline, print_progress_bar, print_warning_bar
 from audio import play_startup_sound, play_shutdown_sound, play_random_sound_effect, play_visualize_sound_effect
 from config import (
     IMAGE_DIRECTORY, TerminalColors, BANNER, GOODBYE_BANNER, VISUALIZE_SOUND_EFFECT,
-    check_and_update_api_key  # Import the new function
+    check_and_update_api_key, check_and_update_replicate_token, set_image_gen_method
 )
 
+def open_file(file_path):
+    if sys.platform.startswith('darwin'):  # macOS
+        subprocess.run(['open', file_path])
+    elif sys.platform.startswith('win32'):  # Windows
+        os.startfile(file_path)
+    else:  # Linux and other Unix-like
+        subprocess.run(['xdg-open', file_path])
+
+def choose_image_generation_method():
+    while True:
+        choice = input("Choose image generation method (1 for Replicate API, 2 for local Stable Diffusion): ").strip()
+        if choice == '1':
+            return 'replicate'
+        elif choice == '2':
+            return 'local_sd'
+        else:
+            print("Invalid choice. Please enter 1 or 2.")
+
 async def main():
-    # Check and update the API key if necessary
+    # Choose image generation method
+    method = choose_image_generation_method()
+    set_image_gen_method(method)
+
+    # Check and update the API keys if necessary
     api_key = check_and_update_api_key()
+    if method == 'replicate':
+        replicate_token = check_and_update_replicate_token()
 
     play_startup_sound()
     await print_slow_multiline(f"""Initializing Safar...{TerminalColors.OKGREEN}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
@@ -56,7 +81,7 @@ Verifying System Integrity...{TerminalColors.OKGREEN}█▓░█▓░█▓░
             if len(conversation_history) > 0:
                 last_message = conversation_history[-1][1]  # Get the last assistant's message
 
-                context = f"""Based on the following text adventure context:\n{last_message}\n\nGenerate a detailed image prompt for Stable Diffusion to generate an image that captures the player's surroundings, objects, characters, and any other relevant visual elements mentioned in the context. The prompt should provide a comprehensive description of what the player is seeing from their point of view (POV) in the text adventure."""
+                context = f"""Based on the following text adventure context:\n{last_message}\n\nGenerate a detailed image prompt for an AI image generation model to create an image that captures the player's surroundings, objects, characters, and any other relevant visual elements mentioned in the context. The prompt should provide a comprehensive description of what the player is seeing from their point of view (POV) in the text adventure."""
 
                 image_prompt = await generate_image_prompt(context)
                 if image_prompt:
@@ -68,15 +93,16 @@ Verifying System Integrity...{TerminalColors.OKGREEN}█▓░█▓░█▓░
         Loading Core Modules... {TerminalColors.WARNING}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
         Verifying Visualization Integrity...{TerminalColors.WARNING}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
         """, delay=.008)        
-                    await print_slow_multiline(f"{TerminalColors.OKBLUE}Initializing Latent Diffusion Space...{TerminalColors.ENDC}")
+                    api_name = "Replicate API" if method == 'replicate' else "Local Stable Diffusion"
+                    await print_slow_multiline(f"{TerminalColors.OKBLUE}Initializing {api_name} Connection...{TerminalColors.ENDC}")
                     await print_warning_bar(duration=6)
-                    await print_slow_multiline(f"{TerminalColors.HEADER}Denoising...{TerminalColors.ENDC}")
+                    await print_slow_multiline(f"{TerminalColors.HEADER}Processing Image Generation...{TerminalColors.ENDC}")
                     await print_warning_bar(duration=5)
-                    await print_slow(f"Latent Space {TerminalColors.OKGREEN}Verified: 8472{TerminalColors.ENDC}")
+                    await print_slow(f"{api_name} {TerminalColors.OKGREEN}Connected: 8472{TerminalColors.ENDC}")
                     await print_slow(f"Quantum seed stability: {TerminalColors.OKGREEN}97.3%{TerminalColors.ENDC}")
-                    await print_slow(f"Latent Visualization Resolution Index: {TerminalColors.OKGREEN}44.8{TerminalColors.ENDC}")
-                    await print_slow(f"Denoising Strength Set: {TerminalColors.OKGREEN}74.625{TerminalColors.ENDC}")
-                    await print_slow(f"Stable Diffusion Environment {TerminalColors.OKGREEN}ACTIVATED{TerminalColors.ENDC}")
+                    await print_slow(f"Image Resolution Index: {TerminalColors.OKGREEN}44.8{TerminalColors.ENDC}")
+                    await print_slow(f"Generation Parameters Set: {TerminalColors.OKGREEN}74.625{TerminalColors.ENDC}")
+                    await print_slow(f"{api_name} {TerminalColors.OKGREEN}ACTIVATED{TerminalColors.ENDC}")
                     await print_slow(f"{TerminalColors.WARNING}Rendering output.................................. ")
                     await print_warning_bar(duration=5)
 
@@ -85,10 +111,10 @@ Verifying System Integrity...{TerminalColors.OKGREEN}█▓░█▓░█▓░
                     
                     if image_path:
                         await print_slow_multiline(f"{TerminalColors.WARNING}Initializing quantum upscaler....................... {TerminalColors.WARNING}Initialized =======>>>>> Image Rendered********{TerminalColors.HEADER}>>>>>>>>>>>>>>>>>SENT TO WARP-MAIL{TerminalColors.ENDC}",delay=.025)
-                        await print_slow_multiline(f"\n{TerminalColors.OKBLUE}Image prompt sent to Stable Diffusion:{TerminalColors.ENDC}")
+                        await print_slow_multiline(f"\n{TerminalColors.OKBLUE}Image prompt sent to {api_name}:{TerminalColors.ENDC}")
                         await print_slow_multiline(f"{TerminalColors.OKGREEN}{image_prompt}{TerminalColors.ENDC}\n")
                         print(f"[Image generated: {image_path}]")
-                        os.startfile(image_path)
+                        open_file(image_path)
                     else:
                         print("[Error generating image]")
                 else:
