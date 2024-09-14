@@ -131,9 +131,11 @@ If you prefer to have more control over the installation process:
    ```
 
 ## 🕹️ How to Play (No Cartridge Blowing Required)
+Type whatever your heart desires. "Go north" is so passé. You can do it, sure... but you can really do anything.  Try all sorts of stuff.  Watch galaxies being born.  Or, zoom in on some dude mowing his lawn on an average day.  Whatever you want really.
 
-- **Explore**: Type whatever your heart desires. "Go north" is so passé. Try "Slingshot around a black hole" instead!
-- **Interact**: Talk to aliens, poke quantum particles, or start an intergalactic dance-off. Your call.
+
+## 🕹️ Commands
+
 - **Visualize**: Type 'visualize' to see what this cosmic madness looks like.
 - **Rage Quit**: Just kidding, type 'quit' to exit (but why would you?).
 
