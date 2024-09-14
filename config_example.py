@@ -9,51 +9,6 @@ REPLICATE_API_TOKEN = os.environ.get('REPLICATE_API_TOKEN', '')
 # Image generation method
 IMAGE_GEN_METHOD = None  # Will be set to 'replicate' or 'local_sd' based on user choice
 
-# Function to check and update API key
-def check_and_update_api_key():
-    global OPENROUTER_KEY
-    if OPENROUTER_KEY == 'your_openrouter_api_key_here' or not OPENROUTER_KEY:
-        print("OpenRouter API key is not set in the config file.")
-        new_key = input("Please enter your OpenRouter API key: ").strip()
-        if new_key:
-            OPENROUTER_KEY = new_key
-            # Update this file with the new key
-            with open(__file__, 'r') as file:
-                lines = file.readlines()
-            for i, line in enumerate(lines):
-                if line.startswith('OPENROUTER_KEY'):
-                    lines[i] = f"OPENROUTER_KEY = '{new_key}'\n"
-                    break
-            with open(__file__, 'w') as file:
-                file.writelines(lines)
-            print("API key has been updated in the config file.")
-        else:
-            print("No API key provided. Some features may not work.")
-    return OPENROUTER_KEY
-
-# Function to check and update Replicate API token
-def check_and_update_replicate_token():
-    global REPLICATE_API_TOKEN
-    if not REPLICATE_API_TOKEN:
-        print("Replicate API token is not set.")
-        new_token = input("Please enter your Replicate API token: ").strip()
-        if new_token:
-            REPLICATE_API_TOKEN = new_token
-            os.environ['REPLICATE_API_TOKEN'] = new_token
-            # Update this file with the new token
-            with open(__file__, 'r') as file:
-                lines = file.readlines()
-            for i, line in enumerate(lines):
-                if line.startswith('REPLICATE_API_TOKEN'):
-                    lines[i] = f"REPLICATE_API_TOKEN = os.environ.get('REPLICATE_API_TOKEN', '{new_token}')\n"
-                    break
-            with open(__file__, 'w') as file:
-                file.writelines(lines)
-            print("Replicate API token has been updated in the config file.")
-        else:
-            print("No Replicate API token provided. Image generation may not work.")
-    return REPLICATE_API_TOKEN
-
 # Function to set image generation method
 def set_image_gen_method(method):
     global IMAGE_GEN_METHOD

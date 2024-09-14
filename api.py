@@ -9,8 +9,7 @@ import replicate
 from config import (
     OPENROUTER_KEY, SYSTEM_PROMPT, SYSTEM_PROMPT_IMG, SYSTEM_PROMPT_MODEL,
     IMG_PROMPT_MODEL, REPLICATE_API_TOKEN, REPLICATE_MODEL, IMAGE_DIRECTORY,
-    REPLICATE_GUIDANCE, STABLE_DIFFUSION_URL, get_image_gen_method,
-    check_and_update_replicate_token
+    REPLICATE_GUIDANCE, STABLE_DIFFUSION_URL, get_image_gen_method
 )
 
 async def generate_response(conversation_history, api_name, api_key):
@@ -83,8 +82,8 @@ async def generate_response(conversation_history, api_name, api_key):
                 return response_text.strip()
 
 async def generate_image_prompt(last_message):
-    if not OPENROUTER_KEY or OPENROUTER_KEY == 'your_openrouter_api_key_here':
-        print("Error: OPENROUTER_KEY is not set or is set to the default value.")
+    if not OPENROUTER_KEY:
+        print("Error: OPENROUTER_KEY is not set.")
         return None
 
     messages = [
@@ -115,15 +114,12 @@ async def generate_image_prompt(last_message):
 
 async def generate_image_replicate(image_prompt):
     try:
-        # Check and update Replicate API token if necessary
-        replicate_token = check_and_update_replicate_token()
-        
         # Ensure the directory for saving images exists
         if not os.path.exists(IMAGE_DIRECTORY):
             os.makedirs(IMAGE_DIRECTORY)
 
         # Set up the Replicate client
-        client = replicate.Client(api_token=replicate_token)
+        client = replicate.Client(api_token=REPLICATE_API_TOKEN)
 
         # Run the Replicate model
         output = client.run(

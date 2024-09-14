@@ -28,6 +28,68 @@ With Safar, you can:
 
 ## 🚀 Boarding the Cosmic Express
 
+### Quick Launch (One-Click Installers)
+
+For those who want to jump straight into the cosmic adventure:
+
+1. Clone this repository:
+   ```
+   git clone https://github.com/fizt656/safar.git
+   cd safar
+   ```
+
+2. Run the one-click installer for your operating system:
+   - On macOS:
+     ```
+     bash install_safar_mac.sh
+     ```
+   - On Windows:
+     ```
+     install_safar_windows.bat
+     ```
+
+These scripts will:
+- Set up a virtual environment
+- Install all required dependencies
+- Create a `config.py` file from the example
+- Prompt you for your OpenRouter API key and Replicate API token
+- Configure the environment variables with your API keys
+
+After installation, follow the on-screen instructions to activate the virtual environment and launch Safar.
+
+### Running Safar
+
+After installation, run Safar using these commands:
+
+- On macOS and Linux:
+  ```
+  source safar_env/bin/activate
+  python safar.py
+  ```
+
+- On Windows:
+  ```
+  safar_env\Scripts\activate.bat
+  python safar.py
+  ```
+
+### Updating API Keys
+
+If you need to update your API keys in the future, you have two options:
+
+1. Edit the `config.py` file:
+   - Open the `config.py` file in a text editor.
+   - Update the `OPENROUTER_KEY` and/or `REPLICATE_API_TOKEN` values.
+   - Save the file and restart Safar.
+
+2. Set environment variables:
+   - Set the `OPENROUTER_KEY` and `REPLICATE_API_TOKEN` environment variables before running Safar.
+   - These will override the values in `config.py`.
+
+### Manual Installation
+
+If you prefer to have more control over the installation process:
+
 1. Clone this bad boy:
    ```
    git clone https://github.com/fizt656/safar.git
@@ -55,16 +117,13 @@ With Safar, you can:
    ```
 
 5. Set up your cosmic keys:
-   - Get your OpenRouter API key (it's like the secret code in your decoder ring)
-   - If you're feeling extra spicy, grab a Replicate API token too!
-   - Don't worry about manually editing any config files. The script will ask for your API keys on first run!
+   - Copy `config_example.py` to `config.py`
+   - Edit `config.py` and add your OpenRouter API key and Replicate API token, or set them as environment variables
 
 6. Launch into the unknown:
    ```
    python safar.py
    ```
-   - On first run, you'll be prompted to enter your API keys. They'll be safely stored for future adventures!
-   - Choose your preferred image generation method: Replicate API for cloud-powered cosmic visions, or local Stable Diffusion for when you want to keep the hallucinations close to home.
 
 7. To return to boring old reality (why would you?), deactivate the virtual environment:
    ```
