@@ -34,18 +34,38 @@ With Safar, you can:
    cd safar
    ```
 
-2. Install the future:
+2. Create a virtual environment (because we're not savages):
+   ```
+   python -m venv safar_env
+   ```
+
+3. Activate your shiny new environment:
+   - On Windows:
+     ```
+     safar_env\Scripts\activate
+     ```
+   - On macOS and Linux:
+     ```
+     source safar_env/bin/activate
+     ```
+
+4. Install the future:
    ```
    pip install -r requirements.txt
    ```
 
-3. Set up your cosmic keys:
+5. Set up your cosmic keys:
    - Rename `config_example.py` to `config.py`
    - Add your OpenRouter API key (it's like the secret code in your decoder ring)
 
-4. Launch into the unknown:
+6. Launch into the unknown:
    ```
    python safar.py
+   ```
+
+7. To return to boring old reality (why would you?), deactivate the virtual environment:
+   ```
+   deactivate
    ```
 
 ## 🕹️ How to Play (No Cartridge Blowing Required)
