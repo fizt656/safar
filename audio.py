@@ -1,6 +1,6 @@
 # audio.py
 
-import pygame
+import pygame # type: ignore
 import random
 from config import STARTUP_SOUND_PATH, SHUTDOWN_SOUND_PATH, SOUND_EFFECTS, VISUALIZE_SOUND_EFFECT
 
