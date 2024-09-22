@@ -30,6 +30,69 @@ def choose_image_generation_method():
         else:
             print("Invalid choice. Please enter 1 or 2.")
 
+async def visualize_full(conversation_history, method):
+    await play_visualize_sound_effect()
+
+    if len(conversation_history) > 0:
+        last_message = conversation_history[-1][1]
+        context = f"""Based on the following text adventure context:\n{last_message}\n\nGenerate a detailed image prompt for an AI image generation model to create an image that captures the player's surroundings, objects, characters, and any other relevant visual elements mentioned in the context. The prompt should provide a comprehensive description of what the player is seeing from their point of view (POV) in the text adventure."""
+
+        image_prompt = await generate_image_prompt(context)
+        if image_prompt:
+            image_generation_task = asyncio.create_task(generate_image(image_prompt))
+
+            await print_slow_multiline(f"""Initializing Quantum Visualization Core...{TerminalColors.WARNING}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
+Loading Core Modules... {TerminalColors.WARNING}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
+Verifying Visualization Integrity...{TerminalColors.WARNING}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
+""", delay=.008)        
+            api_name = "Replicate API" if method == 'replicate' else "Local Stable Diffusion"
+            await print_slow_multiline(f"{TerminalColors.OKBLUE}Initializing {api_name} Connection...{TerminalColors.ENDC}")
+            await print_warning_bar(duration=6)
+            await print_slow_multiline(f"{TerminalColors.HEADER}Processing Image Generation...{TerminalColors.ENDC}")
+            await print_warning_bar(duration=5)
+            await print_slow(f"{api_name} {TerminalColors.OKGREEN}Connected: 8472{TerminalColors.ENDC}")
+            await print_slow(f"Quantum seed stability: {TerminalColors.OKGREEN}97.3%{TerminalColors.ENDC}")
+            await print_slow(f"Image Resolution Index: {TerminalColors.OKGREEN}44.8{TerminalColors.ENDC}")
+            await print_slow(f"Generation Parameters Set: {TerminalColors.OKGREEN}74.625{TerminalColors.ENDC}")
+            await print_slow(f"{api_name} {TerminalColors.OKGREEN}ACTIVATED{TerminalColors.ENDC}")
+            await print_slow(f"{TerminalColors.WARNING}Rendering output.................................. ")
+            await print_warning_bar(duration=5)
+
+            image_path = await image_generation_task
+            
+            if image_path:
+                await print_slow_multiline(f"{TerminalColors.WARNING}Initializing quantum upscaler....................... {TerminalColors.WARNING}Initialized =======>>>>> Image Rendered********{TerminalColors.HEADER}>>>>>>>>>>>>>>>>>SENT TO WARP-MAIL{TerminalColors.ENDC}",delay=.025)
+                await print_slow_multiline(f"\n{TerminalColors.OKBLUE}Image prompt sent to {api_name}:{TerminalColors.ENDC}")
+                await print_slow_multiline(f"{TerminalColors.OKGREEN}{image_prompt}{TerminalColors.ENDC}\n")
+                print(f"[Image generated: {image_path}]")
+                open_file(image_path)
+            else:
+                print("[Error generating image]")
+        else:
+            print("[Error generating image prompt]")
+    else:
+        print("[No previous context available for visualization]")
+
+async def visualize_quick(conversation_history, method):
+    if len(conversation_history) > 0:
+        last_message = conversation_history[-1][1]
+        context = f"""Based on the following text adventure context:\n{last_message}\n\nGenerate a detailed image prompt for an AI image generation model to create an image that captures the player's surroundings, objects, characters, and any other relevant visual elements mentioned in the context. The prompt should provide a comprehensive description of what the player is seeing from their point of view (POV) in the text adventure."""
+
+        image_prompt = await generate_image_prompt(context)
+        if image_prompt:
+            print("Generating image...")
+            image_path = await generate_image(image_prompt)
+            
+            if image_path:
+                print(f"[Image generated: {image_path}]")
+                open_file(image_path)
+            else:
+                print("[Error generating image]")
+        else:
+            print("[Error generating image prompt]")
+    else:
+        print("[No previous context available for visualization]")
+
 async def main():
     # Choose image generation method
     method = choose_image_generation_method()
@@ -79,52 +142,11 @@ Verifying System Integrity...{TerminalColors.OKGREEN}█▓░█▓░█▓░
             await print_slow_multiline(GOODBYE_BANNER, delay=0.015)
             break
 
-        if user_input.lower() == 'visualize':
-            await play_visualize_sound_effect()  # Play the visualization sound effect
-
-            if len(conversation_history) > 0:
-                last_message = conversation_history[-1][1]  # Get the last assistant's message
-
-                context = f"""Based on the following text adventure context:\n{last_message}\n\nGenerate a detailed image prompt for an AI image generation model to create an image that captures the player's surroundings, objects, characters, and any other relevant visual elements mentioned in the context. The prompt should provide a comprehensive description of what the player is seeing from their point of view (POV) in the text adventure."""
-
-                image_prompt = await generate_image_prompt(context)
-                if image_prompt:
-                    # Start the image generation process concurrently
-                    image_generation_task = asyncio.create_task(generate_image(image_prompt))
-
-                    # Display progress bars and status updates while the image is being generated
-                    await print_slow_multiline(f"""Initializing Quantum Visualization Core...{TerminalColors.WARNING}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
-        Loading Core Modules... {TerminalColors.WARNING}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
-        Verifying Visualization Integrity...{TerminalColors.WARNING}█▓░█▓░█▓░█▓▓░{TerminalColors.ENDC}
-        """, delay=.008)        
-                    api_name = "Replicate API" if method == 'replicate' else "Local Stable Diffusion"
-                    await print_slow_multiline(f"{TerminalColors.OKBLUE}Initializing {api_name} Connection...{TerminalColors.ENDC}")
-                    await print_warning_bar(duration=6)
-                    await print_slow_multiline(f"{TerminalColors.HEADER}Processing Image Generation...{TerminalColors.ENDC}")
-                    await print_warning_bar(duration=5)
-                    await print_slow(f"{api_name} {TerminalColors.OKGREEN}Connected: 8472{TerminalColors.ENDC}")
-                    await print_slow(f"Quantum seed stability: {TerminalColors.OKGREEN}97.3%{TerminalColors.ENDC}")
-                    await print_slow(f"Image Resolution Index: {TerminalColors.OKGREEN}44.8{TerminalColors.ENDC}")
-                    await print_slow(f"Generation Parameters Set: {TerminalColors.OKGREEN}74.625{TerminalColors.ENDC}")
-                    await print_slow(f"{api_name} {TerminalColors.OKGREEN}ACTIVATED{TerminalColors.ENDC}")
-                    await print_slow(f"{TerminalColors.WARNING}Rendering output.................................. ")
-                    await print_warning_bar(duration=5)
-
-                    # Wait for the image generation to complete
-                    image_path = await image_generation_task
-                    
-                    if image_path:
-                        await print_slow_multiline(f"{TerminalColors.WARNING}Initializing quantum upscaler....................... {TerminalColors.WARNING}Initialized =======>>>>> Image Rendered********{TerminalColors.HEADER}>>>>>>>>>>>>>>>>>SENT TO WARP-MAIL{TerminalColors.ENDC}",delay=.025)
-                        await print_slow_multiline(f"\n{TerminalColors.OKBLUE}Image prompt sent to {api_name}:{TerminalColors.ENDC}")
-                        await print_slow_multiline(f"{TerminalColors.OKGREEN}{image_prompt}{TerminalColors.ENDC}\n")
-                        print(f"[Image generated: {image_path}]")
-                        open_file(image_path)
-                    else:
-                        print("[Error generating image]")
-                else:
-                    print("[Error generating image prompt]")
+        if user_input.lower().startswith('visualize'):
+            if '--full' in user_input.lower():
+                await visualize_full(conversation_history, method)
             else:
-                print("[No previous context available for visualization]")
+                await visualize_quick(conversation_history, method)
             
         else:
             conversation_history.append(("user", user_input))
