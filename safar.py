@@ -142,12 +142,10 @@ Verifying System Integrity...{TerminalColors.OKGREEN}█▓░█▓░█▓░
             await print_slow_multiline(GOODBYE_BANNER, delay=0.015)
             break
 
-        if user_input.lower().startswith('visualize'):
-            if '--full' in user_input.lower():
-                await visualize_full(conversation_history, method)
-            else:
-                await visualize_quick(conversation_history, method)
-            
+        if user_input.lower() in ['vis', 'visualize']:
+            await visualize_full(conversation_history, method)
+        elif user_input.lower() == 'visfast':
+            await visualize_quick(conversation_history, method)
         else:
             conversation_history.append(("user", user_input))
             await print_slow_multiline(f"{TerminalColors.HEADER}Processing your request...{TerminalColors.ENDC}")

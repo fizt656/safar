@@ -136,7 +136,9 @@ Type whatever your heart desires. "Go north" is so passé. You can do it, sure..
 
 ## 🕹️ Commands
 
-- **Visualize**: Type 'visualize' to see what this cosmic madness looks like.
+- **Visualize**: 
+  - Type 'vis' or 'visualize' to see a full, immersive visualization of your cosmic adventure. This includes all the nerdy graphical stuff and dramatic CLI effects.
+  - Type 'visfast' for a quick visualization that generates and opens the image as fast as possible with minimal output.
 - **Rage Quit**: Just kidding, type 'quit' to exit (but why would you?).
 
 ## 🎨 Choose Your Reality Painter
