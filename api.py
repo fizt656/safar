@@ -1,11 +1,11 @@
 # api.py
 
-import aiohttp
+import aiohttp # type: ignore
 from datetime import datetime
 import base64
 import json
 import os
-import replicate
+import replicate  # type: ignore
 from config import (
     OPENROUTER_KEY, SYSTEM_PROMPT, SYSTEM_PROMPT_IMG, SYSTEM_PROMPT_MODEL,
     IMG_PROMPT_MODEL, REPLICATE_API_TOKEN, REPLICATE_MODEL, IMAGE_DIRECTORY,
