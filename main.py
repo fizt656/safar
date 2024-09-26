@@ -3,8 +3,10 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 import asyncio
 import os
-from config import GAME_TITLE, WINDOW_SIZE, TEXT_COLOR_PLAYER_INPUT, TEXT_COLOR_GAME_RESPONSE, MAX_CONVERSATION_HISTORY, BANNER, set_image_gen_method
+import sys
+from config import GAME_TITLE, WINDOW_SIZE, TEXT_COLOR_PLAYER_INPUT, TEXT_COLOR_GAME_RESPONSE, MAX_CONVERSATION_HISTORY, BANNER, set_image_gen_method, get_image_gen_method
 from safar import Safar
+from api import generate_image_prompt, generate_image
 
 class SafarGUI:
     def __init__(self, master):
@@ -16,9 +18,10 @@ class SafarGUI:
         self.style = ttk.Style()
         self.style.theme_use('default')
         self.style.configure('TFrame', background='black')
-        self.style.configure('TButton', background='#333333', foreground='white')
-        self.style.configure('TLabel', background='black', foreground='white')
-        self.style.configure('TEntry', fieldbackground='#333333', foreground='white')
+        self.style.configure('TButton', background='#00FF00', foreground='black', font=('Courier', 10, 'bold'))
+        self.style.configure('TLabel', background='black', foreground='#00FF00', font=('Courier', 10))
+        self.style.configure('TEntry', fieldbackground='black', foreground='#00FF00', font=('Courier', 10))
+        self.style.map('TButton', background=[('active', '#00CC00')])
 
         self.safar = Safar()
         self.create_main_menu()
@@ -90,13 +93,13 @@ class SafarGUI:
         self.master.rowconfigure(0, weight=1)
 
         # Game output text area
-        self.game_text = tk.Text(main_frame, wrap=tk.WORD, width=80, height=20, bg='black', fg='white')
+        self.game_text = tk.Text(main_frame, wrap=tk.WORD, width=80, height=20, bg='black', fg='#00FF00', font=('Courier', 10))
         self.game_text.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.game_text.config(state=tk.DISABLED)
 
         # Configure text colors
-        self.game_text.tag_configure("player_input", foreground=TEXT_COLOR_PLAYER_INPUT)
-        self.game_text.tag_configure("game_response", foreground=TEXT_COLOR_GAME_RESPONSE)
+        self.game_text.tag_configure("player_input", foreground='#00FF00')
+        self.game_text.tag_configure("game_response", foreground='#00FF00')
 
         # Scrollbar for game text
         text_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=self.game_text.yview)
@@ -150,18 +153,36 @@ class SafarGUI:
         asyncio.run(self.process_command(command))
 
     async def process_command(self, command):
-        response = await self.safar.process_input(command)
-        if isinstance(response, str):
-            # For visualization commands or error messages that return a string
-            self.stream_text(response, "game_response")
-            if "Image generated:" in response or "Quick visualization generated:" in response:
-                image_path = response.split(":")[1].split("\n")[0].strip()
+        if command.lower() in ['vis', 'visfast']:
+            recent_context = self.get_recent_game_text()
+            self.update_game_text("Generating image based on recent context...\n", "game_response")
+            
+            # Generate image prompt
+            image_prompt = await generate_image_prompt(recent_context)
+            self.update_game_text(f"Generated prompt: {image_prompt}\n", "game_response")
+            
+            # Generate image
+            image_path = await generate_image(image_prompt, get_image_gen_method())
+            
+            if image_path:
+                self.update_game_text(f"Image generated: {image_path}\n", "game_response")
                 self.display_image(image_path)
+            else:
+                self.update_game_text("Failed to generate image.\n", "game_response")
         else:
-            # For normal responses that are streamed
-            async for token in response:
-                self.update_game_text(token, "game_response")
-                await asyncio.sleep(0.01)  # Small delay to allow GUI to update
+            response = await self.safar.process_input(command)
+            if isinstance(response, str):
+                self.stream_text(response, "game_response")
+            else:
+                async for token in response:
+                    self.update_game_text(token, "game_response")
+                    await asyncio.sleep(0.01)  # Small delay to allow GUI to update
+
+    def get_recent_game_text(self):
+        # Get the last 1000 characters from the game text
+        recent_text = self.game_text.get("end-1000c", "end-1c")
+        # Remove any leading/trailing whitespace and return
+        return recent_text.strip()
 
     def update_game_text(self, text, tag):
         self.game_text.config(state=tk.NORMAL)

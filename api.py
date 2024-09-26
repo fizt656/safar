@@ -48,7 +48,7 @@ async def generate_response(conversation_history, api_type, api_key):
 
 async def generate_image_prompt(context):
     api = OpenRouterAPI()
-    full_prompt = SYSTEM_PROMPT_IMG + "\n\n" + context + "\n\nGenerate a prompt for an image in the style of pixel art, 80s video game, or 80s RPG game."
+    full_prompt = f"{SYSTEM_PROMPT_IMG}\n\nContext: {context}\n\nGenerate a detailed prompt for an image in the style of pixel art or an 80s video game that accurately represents the given context. The prompt should be vivid and specific, capturing the key elements, characters, and atmosphere described in the context."
     response = ""
     async for token in api.generate_stream(full_prompt):
         response += token
