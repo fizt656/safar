@@ -42,6 +42,9 @@ class SafarGUI:
         self.music_playing = False
         self.volume = 0.5  # Initial volume (0.0 to 1.0)
         
+        # Add auto-generate image option
+        self.auto_generate_image = tk.BooleanVar(value=True)
+        
         self.create_main_menu()
         
         # Bind the Esc key to toggle_pause_menu
@@ -113,12 +116,12 @@ class SafarGUI:
     def show_options(self):
         options_window = tk.Toplevel(self.master)
         options_window.title("Options")
-        options_window.geometry("300x250")
+        options_window.geometry("300x300")
         options_window.configure(bg=BACKGROUND_COLOR)
 
         ttk.Label(options_window, text="Choose Image Generation Method:").pack(pady=10)
 
-        method_var = tk.StringVar()
+        method_var = tk.StringVar(value=get_image_gen_method() or "replicate")
         replicate_radio = ttk.Radiobutton(options_window, text="Replicate", variable=method_var, value="replicate")
         replicate_radio.pack()
         local_sd_radio = ttk.Radiobutton(options_window, text="Local Stable Diffusion", variable=method_var, value="local_sd")
@@ -128,6 +131,10 @@ class SafarGUI:
         volume_scale = ttk.Scale(options_window, from_=0, to=100, orient=tk.HORIZONTAL, command=self.set_volume)
         volume_scale.set(self.volume * 100)
         volume_scale.pack()
+
+        # Add auto-generate image option
+        auto_generate_check = ttk.Checkbutton(options_window, text="Auto-generate images", variable=self.auto_generate_image)
+        auto_generate_check.pack(pady=10)
 
         def save_options():
             chosen_method = method_var.get()
@@ -145,7 +152,23 @@ class SafarGUI:
     def start_game(self):
         self.main_menu_frame.destroy()
         self.create_game_widgets()
-        self.stream_intro_text()
+        intro_text = self.safar.start()
+        self.stream_text(intro_text, "game_response")
+        self.master.after(0, self.async_generate_initial_image)
+
+    def async_generate_initial_image(self):
+        asyncio.run(self.generate_initial_image())
+
+    async def generate_initial_image(self):
+        # Generate initial image
+        initial_prompt = "A pixel art scene of a 90s video game adventure, shown from the player's point of view. The scene should depict the start of an epic journey in a mystical desert setting."
+        self.update_game_text("Generating initial game scene...\n", "game_response")
+        image_path = await generate_image(initial_prompt, get_image_gen_method())
+        if image_path:
+            self.update_game_text(f"Initial scene generated: {image_path}\n", "game_response")
+            self.display_image(image_path)
+        else:
+            self.update_game_text("Failed to generate initial scene.\n", "game_response")
 
     def create_game_widgets(self):
         # Main frame
@@ -185,10 +208,6 @@ class SafarGUI:
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(0, weight=1)
 
-    def stream_intro_text(self):
-        intro_text = self.safar.start()
-        self.stream_text(intro_text, "game_response")
-
     def stream_text(self, text, tag):
         def stream(remaining_text):
             if remaining_text:
@@ -216,21 +235,7 @@ class SafarGUI:
 
     async def process_command(self, command):
         if command.lower() in ['vis', 'visfast']:
-            recent_context = self.get_recent_game_text()
-            self.update_game_text("Generating image based on recent context...\n", "game_response")
-            
-            # Generate image prompt
-            image_prompt = await generate_image_prompt(recent_context)
-            self.update_game_text(f"Generated prompt: {image_prompt}\n", "game_response")
-            
-            # Generate image
-            image_path = await generate_image(image_prompt, get_image_gen_method())
-            
-            if image_path:
-                self.update_game_text(f"Image generated: {image_path}\n", "game_response")
-                self.display_image(image_path)
-            else:
-                self.update_game_text("Failed to generate image.\n", "game_response")
+            await self.generate_image()
         else:
             response = await self.safar.process_input(command)
             if isinstance(response, str):
@@ -239,6 +244,26 @@ class SafarGUI:
                 async for token in response:
                     self.update_game_text(token, "game_response")
                     await asyncio.sleep(0.01)  # Small delay to allow GUI to update
+            
+            if self.auto_generate_image.get():
+                await self.generate_image()
+
+    async def generate_image(self):
+        recent_context = self.get_recent_game_text()
+        self.update_game_text("Generating image based on recent context...\n", "game_response")
+        
+        # Generate image prompt
+        image_prompt = await generate_image_prompt(recent_context)
+        self.update_game_text(f"Generated prompt: {image_prompt}\n", "game_response")
+        
+        # Generate image
+        image_path = await generate_image(image_prompt, get_image_gen_method())
+        
+        if image_path:
+            self.update_game_text(f"Image generated: {image_path}\n", "game_response")
+            self.display_image(image_path)
+        else:
+            self.update_game_text("Failed to generate image.\n", "game_response")
 
     def get_recent_game_text(self):
         # Get the last 1000 characters from the game text
