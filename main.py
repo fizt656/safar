@@ -1,11 +1,19 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, font
 from PIL import Image, ImageTk
 import asyncio
 import os
 import sys
+
+# Suppress pygame welcome message
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+
 import pygame
-from config import GAME_TITLE, WINDOW_SIZE, TEXT_COLOR_PLAYER_INPUT, TEXT_COLOR_GAME_RESPONSE, MAX_CONVERSATION_HISTORY, BANNER, set_image_gen_method, get_image_gen_method
+from config import (
+    GAME_TITLE, WINDOW_SIZE, TEXT_COLOR_PLAYER_INPUT, TEXT_COLOR_GAME_RESPONSE,
+    MAX_CONVERSATION_HISTORY, BANNER, set_image_gen_method, get_image_gen_method,
+    BACKGROUND_COLOR, BUTTON_COLOR, TEXT_COLOR, GAME_TEXT_BG, GAME_FONT, FALLBACK_FONTS
+)
 from safar import Safar
 from api import generate_image_prompt, generate_image
 
@@ -14,15 +22,15 @@ class SafarGUI:
         self.master = master
         master.title(GAME_TITLE)
         master.geometry(WINDOW_SIZE)
-        master.configure(bg='black')
+        master.configure(bg=BACKGROUND_COLOR)
 
         self.style = ttk.Style()
         self.style.theme_use('default')
-        self.style.configure('TFrame', background='black')
-        self.style.configure('TButton', background='#00FF00', foreground='black', font=('Courier', 10, 'bold'))
-        self.style.configure('TLabel', background='black', foreground='#00FF00', font=('Courier', 10))
-        self.style.configure('TEntry', fieldbackground='black', foreground='#00FF00', font=('Courier', 10))
-        self.style.map('TButton', background=[('active', '#00CC00')])
+        self.style.configure('TFrame', background=BACKGROUND_COLOR)
+        self.style.configure('TButton', background=BUTTON_COLOR, foreground=TEXT_COLOR, font=self.get_font())
+        self.style.configure('TLabel', background=BACKGROUND_COLOR, foreground=TEXT_COLOR, font=self.get_font())
+        self.style.configure('TEntry', fieldbackground=GAME_TEXT_BG, foreground=TEXT_COLOR, font=self.get_font())
+        self.style.map('TButton', background=[('active', self.darken_color(BUTTON_COLOR))])
 
         self.safar = Safar()
         
@@ -41,6 +49,32 @@ class SafarGUI:
         
         # Initialize pause menu state
         self.pause_menu_active = False
+
+        # Display "Preparing for Safar..." message
+        self.show_preparing_message()
+
+    def get_font(self, size=12):
+        for font_name in [GAME_FONT[0]] + list(FALLBACK_FONTS):
+            if font_name in font.families():
+                return (font_name, size)
+        return ('TkDefaultFont', size)
+
+    def darken_color(self, color):
+        # Convert hex to RGB
+        r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+        # Darken by 20%
+        factor = 0.8
+        r, g, b = int(r*factor), int(g*factor), int(b*factor)
+        # Convert back to hex
+        return f'#{r:02x}{g:02x}{b:02x}'
+
+    def show_preparing_message(self):
+        preparing_frame = ttk.Frame(self.master, padding="10")
+        preparing_frame.place(relx=0.5, rely=0.5, anchor="center")
+        preparing_label = ttk.Label(preparing_frame, text="Preparing for Safar...", font=self.get_font(16))
+        preparing_label.pack()
+        self.master.update()
+        self.master.after(2000, preparing_frame.destroy)  # Remove after 2 seconds
 
     def create_main_menu(self):
         self.main_menu_frame = ttk.Frame(self.master, padding="10")
@@ -80,7 +114,7 @@ class SafarGUI:
         options_window = tk.Toplevel(self.master)
         options_window.title("Options")
         options_window.geometry("300x250")
-        options_window.configure(bg='black')
+        options_window.configure(bg=BACKGROUND_COLOR)
 
         ttk.Label(options_window, text="Choose Image Generation Method:").pack(pady=10)
 
@@ -121,13 +155,13 @@ class SafarGUI:
         self.master.rowconfigure(0, weight=1)
 
         # Game output text area
-        self.game_text = tk.Text(main_frame, wrap=tk.WORD, width=80, height=20, bg='black', fg='#00FF00', font=('Courier', 10))
+        self.game_text = tk.Text(main_frame, wrap=tk.WORD, width=80, height=20, bg=GAME_TEXT_BG, fg=TEXT_COLOR, font=self.get_font())
         self.game_text.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.game_text.config(state=tk.DISABLED)
 
         # Configure text colors
-        self.game_text.tag_configure("player_input", foreground='#00FF00')
-        self.game_text.tag_configure("game_response", foreground='#00FF00')
+        self.game_text.tag_configure("player_input", foreground=TEXT_COLOR_PLAYER_INPUT)
+        self.game_text.tag_configure("game_response", foreground=TEXT_COLOR_GAME_RESPONSE)
 
         # Scrollbar for game text
         text_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=self.game_text.yview)

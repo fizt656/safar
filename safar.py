@@ -14,24 +14,24 @@ class Safar:
         self.image_gen_method = get_image_gen_method()
         
         startup_message = f"""Initializing Safar...
-Loading Core Modules...
-Verifying System Integrity...
+Loading Desert Modules...
+Verifying Oasis Integrity...
 
 {BANNER}
 
-Initiating quantum core startup...
-Decrypting celestial payload...
+The sands of time begin to shift...
+Ancient whispers carried on the desert wind...
 
-|*!!DATA DECRYPTED!!*|
-Star clusters aligned: 8472
-Quantum flux stability: 97.3%
-Nebula gas index: 44.8
+|*!!MYSTICAL ENERGIES AWAKENED!!*|
+Sand dunes mapped: 1001
+Mirage stability: 87.6%
+Oasis water index: 32.4
 
 Loading complete.
-Safar Universe Matrix [v. ῳnπ]
-Last celestial insertion: ♎︎13,799,700,012.7
+Safar: Desert Odyssey [v. 1.0]
+Last caravan departure: 7 moons ago
 
-$Safar> Welcome to Safar! What would you like to explore in this vast universe?"""
+$Safar> Welcome, traveler, to the mystical deserts of Safar! What secrets do you seek in these ancient sands?"""
         
         return startup_message
 
@@ -80,7 +80,7 @@ $Safar> Welcome to Safar! What would you like to explore in this vast universe?"
             return "No previous context available for quick visualization"
 
     def shutdown(self):
-        return f"""Last celestial evacuation: ♎︎13,799,700,012.7
-Initiating quantum core quench sequence...
+        return f"""Last caravan departure: 7 moons ago
+The desert sands begin to settle...
 
 {GOODBYE_BANNER}"""
