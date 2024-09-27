@@ -101,7 +101,7 @@ async def generate_image_replicate(prompt):
 async def generate_image_local_sd(prompt):
     payload = {
         "prompt": prompt,
-        "steps": 50
+        "steps": 30
     }
     
     try:

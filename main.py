@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 import asyncio
 import os
 import sys
+import pygame
 from config import GAME_TITLE, WINDOW_SIZE, TEXT_COLOR_PLAYER_INPUT, TEXT_COLOR_GAME_RESPONSE, MAX_CONVERSATION_HISTORY, BANNER, set_image_gen_method, get_image_gen_method
 from safar import Safar
 from api import generate_image_prompt, generate_image
@@ -24,7 +25,22 @@ class SafarGUI:
         self.style.map('TButton', background=[('active', '#00CC00')])
 
         self.safar = Safar()
+        
+        # Initialize pygame mixer for audio
+        pygame.mixer.init()
+        
+        # Set up music
+        self.music_file = os.path.join('music', 'music.mp3')
+        self.music_playing = False
+        self.volume = 0.5  # Initial volume (0.0 to 1.0)
+        
         self.create_main_menu()
+        
+        # Bind the Esc key to toggle_pause_menu
+        self.master.bind('<Escape>', self.toggle_pause_menu)
+        
+        # Initialize pause menu state
+        self.pause_menu_active = False
 
     def create_main_menu(self):
         self.main_menu_frame = ttk.Frame(self.master, padding="10")
@@ -47,6 +63,9 @@ class SafarGUI:
         options_button = ttk.Button(self.main_menu_frame, text="OPTIONS", command=self.show_options)
         options_button.grid(row=2, column=0, columnspan=2, pady=10)
 
+        # Start playing menu music
+        self.start_menu_music()
+
     def crop_center(self, image, aspect_ratio):
         width, height = image.size
         new_width = min(width, int(height * aspect_ratio))
@@ -60,7 +79,7 @@ class SafarGUI:
     def show_options(self):
         options_window = tk.Toplevel(self.master)
         options_window.title("Options")
-        options_window.geometry("300x200")
+        options_window.geometry("300x250")
         options_window.configure(bg='black')
 
         ttk.Label(options_window, text="Choose Image Generation Method:").pack(pady=10)
@@ -71,14 +90,23 @@ class SafarGUI:
         local_sd_radio = ttk.Radiobutton(options_window, text="Local Stable Diffusion", variable=method_var, value="local_sd")
         local_sd_radio.pack()
 
+        ttk.Label(options_window, text="Music Volume:").pack(pady=10)
+        volume_scale = ttk.Scale(options_window, from_=0, to=100, orient=tk.HORIZONTAL, command=self.set_volume)
+        volume_scale.set(self.volume * 100)
+        volume_scale.pack()
+
         def save_options():
             chosen_method = method_var.get()
             if chosen_method:
                 set_image_gen_method(chosen_method)
-                options_window.destroy()
+            options_window.destroy()
 
         save_button = ttk.Button(options_window, text="Save", command=save_options)
         save_button.pack(pady=20)
+
+    def set_volume(self, val):
+        self.volume = float(val) / 100
+        pygame.mixer.music.set_volume(self.volume)
 
     def start_game(self):
         self.main_menu_frame.destroy()
@@ -203,6 +231,54 @@ class SafarGUI:
                 self.update_game_text(f"Error displaying image: {str(e)}\n", "game_response")
         else:
             self.update_game_text(f"Error: Image file not found or generation failed\n", "game_response")
+
+    def toggle_pause_menu(self, event=None):
+        if self.pause_menu_active:
+            self.pause_menu_frame.destroy()
+            self.pause_menu_active = False
+        else:
+            self.create_pause_menu()
+            self.pause_menu_active = True
+
+    def create_pause_menu(self):
+        self.pause_menu_frame = ttk.Frame(self.master, padding="10")
+        self.pause_menu_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        resume_button = ttk.Button(self.pause_menu_frame, text="Resume Game", command=self.toggle_pause_menu)
+        resume_button.pack(pady=10)
+
+        main_menu_button = ttk.Button(self.pause_menu_frame, text="Exit to Main Menu", command=self.exit_to_main_menu)
+        main_menu_button.pack(pady=10)
+
+        exit_button = ttk.Button(self.pause_menu_frame, text="Exit Game", command=self.exit_game)
+        exit_button.pack(pady=10)
+
+    def exit_to_main_menu(self):
+        # Destroy current game widgets
+        for widget in self.master.winfo_children():
+            widget.destroy()
+        
+        # Recreate main menu
+        self.create_main_menu()
+        
+        # Reset pause menu state
+        self.pause_menu_active = False
+
+    def exit_game(self):
+        self.stop_menu_music()
+        self.master.quit()
+
+    def start_menu_music(self):
+        if not self.music_playing:
+            pygame.mixer.music.load(self.music_file)
+            pygame.mixer.music.set_volume(self.volume)
+            pygame.mixer.music.play(-1)  # -1 means loop indefinitely
+            self.music_playing = True
+
+    def stop_menu_music(self):
+        if self.music_playing:
+            pygame.mixer.music.stop()
+            self.music_playing = False
 
 if __name__ == "__main__":
     root = tk.Tk()
