@@ -22,16 +22,12 @@ Verifying Oasis Integrity...
 The sands of time begin to shift...
 Ancient whispers carried on the desert wind...
 
-|*!!MYSTICAL ENERGIES AWAKENED!!*|
-Sand dunes mapped: 1001
-Mirage stability: 87.6%
-Oasis water index: 32.4
-
 Loading complete.
 Safar: Desert Odyssey [v. 1.0]
 Last caravan departure: 7 moons ago
 
-$Safar> Welcome, traveler, to the mystical deserts of Safar! What secrets do you seek in these ancient sands?"""
+$Safar>>>
+>> Welcome, traveler, to the mystical deserts of Safar! What secrets do you seek in these ancient sands?"""
         
         return startup_message
 

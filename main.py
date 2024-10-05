@@ -63,12 +63,9 @@ class SafarGUI:
         return ('TkDefaultFont', size)
 
     def darken_color(self, color):
-        # Convert hex to RGB
         r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
-        # Darken by 20%
         factor = 0.8
         r, g, b = int(r*factor), int(g*factor), int(b*factor)
-        # Convert back to hex
         return f'#{r:02x}{g:02x}{b:02x}'
 
     def show_preparing_message(self):
@@ -153,68 +150,56 @@ class SafarGUI:
         self.main_menu_frame.destroy()
         self.create_game_widgets()
         intro_text = self.safar.start()
-        self.stream_text(intro_text, "game_response")
-        self.master.after(0, self.async_generate_initial_image)
+        self.stream_text(intro_text, "game_response", callback=self.async_generate_initial_image)
 
     def async_generate_initial_image(self):
         asyncio.run(self.generate_initial_image())
 
     async def generate_initial_image(self):
-        # Generate initial image
         initial_prompt = "A pixel art scene of a 90s video game adventure, shown from the player's point of view. The scene should depict the start of an epic journey in a mystical desert setting."
-        self.update_game_text("Generating initial game scene...\n", "game_response")
         image_path = await generate_image(initial_prompt, get_image_gen_method())
         if image_path:
-            self.update_game_text(f"Initial scene generated: {image_path}\n", "game_response")
             self.display_image(image_path)
-        else:
-            self.update_game_text("Failed to generate initial scene.\n", "game_response")
 
     def create_game_widgets(self):
-        # Main frame
         main_frame = ttk.Frame(self.master, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
 
-        # Game output text area
         self.game_text = tk.Text(main_frame, wrap=tk.WORD, width=80, height=20, bg=GAME_TEXT_BG, fg=TEXT_COLOR, font=self.get_font())
         self.game_text.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.game_text.config(state=tk.DISABLED)
 
-        # Configure text colors
         self.game_text.tag_configure("player_input", foreground=TEXT_COLOR_PLAYER_INPUT)
         self.game_text.tag_configure("game_response", foreground=TEXT_COLOR_GAME_RESPONSE)
 
-        # Scrollbar for game text
         text_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=self.game_text.yview)
         text_scrollbar.grid(row=0, column=2, sticky=(tk.N, tk.S))
         self.game_text['yscrollcommand'] = text_scrollbar.set
 
-        # Input field
         self.input_field = ttk.Entry(main_frame, width=70)
         self.input_field.grid(row=1, column=0, sticky=(tk.W, tk.E))
         self.input_field.bind("<Return>", lambda event: self.process_input())
 
-        # Submit button
         submit_button = ttk.Button(main_frame, text="Submit", command=self.process_input)
         submit_button.grid(row=1, column=1, sticky=tk.E)
 
-        # Image display area
         self.image_label = ttk.Label(main_frame)
         self.image_label.grid(row=2, column=0, columnspan=2, pady=10)
 
-        # Configure grid weights
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(0, weight=1)
 
-    def stream_text(self, text, tag):
+    def stream_text(self, text, tag, callback=None):
         def stream(remaining_text):
             if remaining_text:
                 self.update_game_text(remaining_text[0], tag)
                 self.master.after(10, lambda: stream(remaining_text[1:]))
             else:
                 self.input_field.focus_set()
+                if callback:
+                    callback()
 
         stream(text)
 
@@ -250,25 +235,14 @@ class SafarGUI:
 
     async def generate_image(self):
         recent_context = self.get_recent_game_text()
-        self.update_game_text("Generating image based on recent context...\n", "game_response")
-        
-        # Generate image prompt
         image_prompt = await generate_image_prompt(recent_context)
-        self.update_game_text(f"Generated prompt: {image_prompt}\n", "game_response")
-        
-        # Generate image
         image_path = await generate_image(image_prompt, get_image_gen_method())
         
         if image_path:
-            self.update_game_text(f"Image generated: {image_path}\n", "game_response")
             self.display_image(image_path)
-        else:
-            self.update_game_text("Failed to generate image.\n", "game_response")
 
     def get_recent_game_text(self):
-        # Get the last 1000 characters from the game text
         recent_text = self.game_text.get("end-1000c", "end-1c")
-        # Remove any leading/trailing whitespace and return
         return recent_text.strip()
 
     def update_game_text(self, text, tag):
@@ -287,9 +261,7 @@ class SafarGUI:
                 self.image_label.config(image=photo)
                 self.image_label.image = photo
             except Exception as e:
-                self.update_game_text(f"Error displaying image: {str(e)}\n", "game_response")
-        else:
-            self.update_game_text(f"Error: Image file not found or generation failed\n", "game_response")
+                pass  # Silently handle image display errors
 
     def toggle_pause_menu(self, event=None):
         if self.pause_menu_active:
@@ -313,14 +285,10 @@ class SafarGUI:
         exit_button.pack(pady=10)
 
     def exit_to_main_menu(self):
-        # Destroy current game widgets
         for widget in self.master.winfo_children():
             widget.destroy()
         
-        # Recreate main menu
         self.create_main_menu()
-        
-        # Reset pause menu state
         self.pause_menu_active = False
 
     def exit_game(self):
